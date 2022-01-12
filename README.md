@@ -1,1 +1,1 @@
-# spottify-playlist-generator
+# spotify-playlist-generator
