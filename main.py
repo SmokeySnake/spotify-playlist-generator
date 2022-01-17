@@ -8,7 +8,7 @@ from json import load as jload
 # and use this to cxreate a Spotify playlist
 
 
-def create_playlist(playlist_name: str, id_list: list) -> None:
+def create_playlist(spot,playlist_name: str, id_list: list) -> None:
     """
     use song ids list to create a playlist 
     in spotify
@@ -20,14 +20,27 @@ def get_song_ids(spot: spotipy.Spotify, songnames: list) -> list:
     search for each song name
     get the song id
     """
+    id_list: list = []
+    # line = enumerate(names)
+    # for line in names:
+    #     #search spotify
+    #     search_mar
 
+
+    # insert song id to the id list 
 
 def read_playlist(playlist_file: str) -> list:
     """
     create a list to add song ids
     take each line in the file of song names
     """
-    id_list: list = []
+    playlist = "./playlists/" + playlist_file
+    print(playlist)
+    
+    with open(playlist,'r') as file:
+        songs = file.readlines()
+        print(songs)
+    return (songs)
 
 
 def choose_playlist_file() -> str:
