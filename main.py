@@ -1,7 +1,9 @@
 
+from itertools import count
 from os import listdir, read
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import json
 from json import load as jload
 
 # Take a list of song names in a text file
@@ -17,16 +19,18 @@ def create_playlist(spot,playlist_name: str, id_list: list) -> None:
 
 def get_song_ids(spot: spotipy.Spotify, songnames: list) -> list:
     """
-    search for each song name
-    get the song id
+    search for each song name on Spotify
+    parse song meta data for the song id 
+    put each song id into a list
     """
-    id_list: list = []
-    # line = enumerate(names)
-    # for line in names:
+   
+    for song in songnames:
     #     #search spotify
-    #     search_mar
+        song_data = spot.search(q=song,limit=1,offset=0,type="track")
+        print(song_data["id"])
+        
 
-
+        
     # insert song id to the id list 
 
 def read_playlist(playlist_file: str) -> list:
