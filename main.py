@@ -6,45 +6,50 @@ from spotipy.oauth2 import SpotifyOAuth
 import json
 from json import load as jload
 
-# Take a list of song names in a text file
+# Take a list of track names in a text file
 # and use this to cxreate a Spotify playlist
 
 
 def create_playlist(spot,playlist_name: str, id_list: list) -> None:
     """
-    use song ids list to create a playlist 
+    use track ids list to create a playlist 
     in spotify
     """
 
 
-def get_song_ids(spot: spotipy.Spotify, songnames: list) -> list:
+def get_track_ids(spot: spotipy.Spotify, tracknames: list) -> list:
     """
     search for each song name on Spotify
     parse song meta data for the song id 
     put each song id into a list
     """
-   
-    for song in songnames:
+    id_list = []
+    for track in tracknames:
     #     #search spotify
-        song_data = spot.search(q=song,limit=1,offset=0,type="track")
-        print(song_data["id"])
+        track_data = spot.search(q=track,limit=1,offset=0,type="track")
+        track_id = track_data['tracks']['items'][0]['id']
+        track_artist = track_data['tracks']['items'][0]['artists'][0]['name']
+        track_name = track_data['tracks']['items'][0]['name']
+        print(track_id,track_name,track_artist)
+        id_list.append(track_id)
+    print(id_list)
+        
         
 
         
-    # insert song id to the id list 
+    # insert track id to the id list 
 
 def read_playlist(playlist_file: str) -> list:
     """
-    create a list to add song ids
-    take each line in the file of song names
+    create a list to add track ids
+    take each line in the file of track names
     """
     playlist = "./playlists/" + playlist_file
     print(playlist)
     
     with open(playlist,'r') as file:
-        songs = file.readlines()
-        print(songs)
-    return (songs)
+        tracks = file.readlines()
+    return (tracks)
 
 
 def choose_playlist_file() -> str:
@@ -100,11 +105,11 @@ def main() -> None:
 
     file_name: str = choose_playlist_file()
 
-    song_names: list = read_playlist(file_name)
+    track_names: list = read_playlist(file_name)
 
-    song_ids: list = get_song_ids(spot, song_names)
+    track_ids: list = get_track_ids(spot, track_names)
 
-    create_playlist(spot, playlist_name, song_ids)
+    create_playlist(spot, playlist_name, track_ids)
 
 
 if __name__ == '__main__':
