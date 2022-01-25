@@ -5,6 +5,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import json
 from json import load as jload
+import discogs_client
 
 # Take a list of track names in a text file
 # and use this to cxreate a Spotify playlist
@@ -95,7 +96,18 @@ def choose_playlist_file() -> str:
 def track_list() :
     """
     creates a track list from different input methods
+    there are multiple methods of inputing a track list
+    1. .txt file
+    2. .JSON file
+    3. .YML file 
+    4. Search Discogs 
     """
+
+    method = input("\n \n Please select an input method: \n1. File \n2. Search")
+    if method == 1:
+        choose_playlist_file()
+    elif method == 2:
+        track_list_search 
     
 
 
@@ -110,6 +122,9 @@ def choose_playlist_name() -> str:
 
 
 def login() -> spotipy.Spotify:
+    """
+    create authentication token for Spotify
+    """
     with open("./config.json", mode="r") as user_cred_file:
         user_cred = jload(user_cred_file)
 
@@ -125,9 +140,24 @@ def login() -> spotipy.Spotify:
 
     return sp
 
+def discog_auth() -> discogs_client.Client:
+    """
+    create authenication token for Discog
+    """
+    with open("./config.json", mode="r") as user_cred_file:
+        user_cred = jload(user_cred_file)
+
+    user_token: str = user_cred["DISCOG_USER_TOKEN"] 
+
+    dc = discogs_client.Client("SpotifyPlaylistGenerator/0.1", user_token=user_token)
+
+    return dc
+
 
 def main() -> None:
     print("\n Welcome to Spotify Playlist Generator! ", end="\n \n")
+
+    disc: discogs_client.Client = discog_auth()
 
     spot: spotipy.Spotify = login()
 
