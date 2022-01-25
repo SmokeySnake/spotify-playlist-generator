@@ -9,35 +9,57 @@ from json import load as jload
 # Take a list of track names in a text file
 # and use this to cxreate a Spotify playlist
 
-
-def create_playlist(spot,playlist_name: str, id_list: list) -> None:
+def tracks_to_playlist(spot,user_id,playlist_id,track_ids: list) -> None:
     """
-    use track ids list to create a playlist 
-    in spotify
+    add tracks to the new playlist
     """
+    spot.user_playlist_add_tracks(user_id, playlist_id, track_ids, position=None)
 
 
-def get_track_ids(spot: spotipy.Spotify, tracknames: list) -> list:
+def create_playlist(spot,playlist_name: str,user_id) -> str:
+    """
+    create a blank playlist
+    """
+    name = playlist_name
+    description = input("Please enter a discription of your new playlist or just press enter")
+
+    public = input("Would you like this playlist to be public? y/n: ")
+    if public == "y":
+        public =  True 
+    elif public == "n":
+        public =  False
+
+    playlist = spot.user_playlist_create(user_id, name, public, collaborative=False, description=description)
+    
+    playlist_id = playlist["id"]
+    return(playlist_id)
+
+
+def get_user_id(spot) -> str:
+    user_info = spot.me()
+    user_id = user_info["id"]
+
+    return(user_id)
+
+
+def get_track_ids(spot: spotipy.Spotify, track_names: list) -> list:
     """
     search for each song name on Spotify
     parse song meta data for the song id 
     put each song id into a list
     """
     id_list = []
-    for track in tracknames:
+    for track in track_names:
     #     #search spotify
         track_data = spot.search(q=track,limit=1,offset=0,type="track")
         track_id = track_data['tracks']['items'][0]['id']
         track_artist = track_data['tracks']['items'][0]['artists'][0]['name']
         track_name = track_data['tracks']['items'][0]['name']
-        print(track_id,track_name,track_artist)
+        print(track_name,track_artist, track_id)
         id_list.append(track_id)
-    print(id_list)
-        
-        
 
-        
-    # insert track id to the id list 
+    return(id_list)
+    
 
 def read_playlist(playlist_file: str) -> list:
     """
@@ -70,13 +92,21 @@ def choose_playlist_file() -> str:
     return playlists[selection]
 
 
+def track_list() :
+    """
+    creates a track list from different input methods
+    """
+    
+
+
 def choose_playlist_name() -> str:
     """
     user input a title for the playlist
     """
-
     playlist_title = input("please enter your playlist name: ")
     print(f"\nYour playlist title is: {playlist_title}")
+
+    return playlist_title
 
 
 def login() -> spotipy.Spotify:
@@ -87,7 +117,7 @@ def login() -> spotipy.Spotify:
     client_secret: str = user_cred["SPOTIPY_CLIENT_SECRET"]
     redirect_uri: str = user_cred["SPOTIPY_REDIRECT_URI"]
 
-    scope = "user-library-read"
+    scope = "playlist-modify-private"
 
     spot_oa = SpotifyOAuth(scope=scope, client_id=client_id,
                            client_secret=client_secret, redirect_uri=redirect_uri)
@@ -109,7 +139,11 @@ def main() -> None:
 
     track_ids: list = get_track_ids(spot, track_names)
 
-    create_playlist(spot, playlist_name, track_ids)
+    user_id: str = get_user_id(spot)
+
+    playlist_id = create_playlist(spot, playlist_name,user_id)
+
+    tracks_to_playlist(spot,user_id,playlist_id,track_ids)
 
 
 if __name__ == '__main__':
