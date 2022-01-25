@@ -17,18 +17,14 @@ def tracks_to_playlist(spot,user_id,playlist_id,track_ids: list) -> None:
     spot.user_playlist_add_tracks(user_id, playlist_id, track_ids, position=None)
 
 
-def create_playlist(spot,playlist_name: str,user_id) -> str:
+def create_playlist(spot,playlist_name: str,user_id,public: str) -> str:
     """
-    create a blank playlist
+    create a blank playlist with playlist_name
     """
     name = playlist_name
     description = input("Please enter a discription of your new playlist or just press enter")
 
-    public = input("Would you like this playlist to be public? y/n: ")
-    if public == "y":
-        public =  True 
-    elif public == "n":
-        public =  False
+
 
     playlist = spot.user_playlist_create(user_id, name, public, collaborative=False, description=description)
     
@@ -37,6 +33,9 @@ def create_playlist(spot,playlist_name: str,user_id) -> str:
 
 
 def get_user_id(spot) -> str:
+    """
+    returns spotify user id
+    """
     user_info = spot.me()
     user_id = user_info["id"]
 
@@ -61,6 +60,12 @@ def get_track_ids(spot: spotipy.Spotify, track_names: list) -> list:
 
     return(id_list)
     
+
+def discog_search(disc: discogs_client.Client) -> list:
+    """
+    Search Discog for user input info
+    """
+
 
 def read_playlist(playlist_file: str) -> list:
     """
@@ -93,7 +98,7 @@ def choose_playlist_file() -> str:
     return playlists[selection]
 
 
-def track_list() :
+def choose_input_method() :
     """
     creates a track list from different input methods
     there are multiple methods of inputing a track list
@@ -103,11 +108,21 @@ def track_list() :
     4. Search Discogs 
     """
 
-    method = input("\n \n Please select an input method: \n1. File \n2. Search")
-    if method == 1:
-        choose_playlist_file()
-    elif method == 2:
-        track_list_search 
+    success: bool = False
+    while not success:
+        success = True
+
+        method = input("\n \n Please select an input method: \n1. File \n2. Search")
+
+        match method:
+            case "1":
+                choose_playlist_file()
+
+            case "2":
+                discog_search()
+
+            case _:
+                success = False
     
 
 
@@ -121,7 +136,7 @@ def choose_playlist_name() -> str:
     return playlist_title
 
 
-def login() -> spotipy.Spotify:
+def spotify_auth(public: str) -> spotipy.Spotify:
     """
     create authentication token for Spotify
     """
@@ -132,7 +147,10 @@ def login() -> spotipy.Spotify:
     client_secret: str = user_cred["SPOTIPY_CLIENT_SECRET"]
     redirect_uri: str = user_cred["SPOTIPY_REDIRECT_URI"]
 
-    scope = "playlist-modify-private"
+    if public == "y":
+        scope = "playlist-modify-public"
+    elif public == "n":
+        scope = "playlist-modify-private"
 
     spot_oa = SpotifyOAuth(scope=scope, client_id=client_id,
                            client_secret=client_secret, redirect_uri=redirect_uri)
@@ -157,11 +175,20 @@ def discog_auth() -> discogs_client.Client:
 def main() -> None:
     print("\n Welcome to Spotify Playlist Generator! ", end="\n \n")
 
+    public = input("Would you like this playlist to be public? y/n: ")
+    match public:
+        case "y":
+            public = True
+        case "n":
+            public = False
+
     disc: discogs_client.Client = discog_auth()
 
-    spot: spotipy.Spotify = login()
+    spot: spotipy.Spotify = spotify_auth(public)
 
     playlist_name: str = choose_playlist_name()
+
+    choose_input_method()
 
     file_name: str = choose_playlist_file()
 
