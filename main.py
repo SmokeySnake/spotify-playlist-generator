@@ -1,10 +1,7 @@
 
-from http import client
-from itertools import count
-from os import listdir, read
+from os import listdir
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-import json
 from json import load as jload
 import discogs_client
 
@@ -49,7 +46,6 @@ def get_track_ids(spot: spotipy.Spotify, track_names: list) -> list:
     """
     id_list = []
     for track in track_names:
-    #     #search spotify
         track_data = spot.search(q=track,limit=1,offset=0,type="track")
         track_id = track_data['tracks']['items'][0]['id']
         track_artist = track_data['tracks']['items'][0]['artists'][0]['name']
@@ -78,9 +74,16 @@ def discog_search(disc: discogs_client.Client) -> list:
                 album = input("Pleaase enter album name: ")
                 track_data = disc.search(type="master",query=album,artist=artist)
 
-                track_list = track_data.pages
-                print(track_list)
-                print(track_data)
+                track_list = []
+
+                track_list_data = track_data[0].tracklist
+                i = 0 
+                for Track in track_list_data:
+                    title = track_list_data[i].title
+                    i = i + 1 
+                    track_list.append(title + " " + artist)
+
+                return track_list
 
             case "2":
                 success: bool = False
@@ -93,7 +96,7 @@ def discog_search(disc: discogs_client.Client) -> list:
                         case "1":
                             track = input("Please enter track name: ")
                             artist = input("Please enter artist name: ")
-                            track_list.append(f"{artist} {track}")
+                            track_list.append(f"{track} {artist}")
                         case "2":
                             return track_list
                         case _:
@@ -155,7 +158,7 @@ def get_track_names(disc) -> list:
                 return read_playlist(file_name)
 
             case "2":
-                discog_search(disc)
+                return discog_search(disc)
 
             case _:
                 success = False
