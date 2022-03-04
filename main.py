@@ -1,11 +1,13 @@
 
 from os import listdir
+from unittest import skip
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from json import load as jload
 import discogs_client
 
 # Take a list of track names in a text file
+# or searches discogs for an album track list
 # and use this to cxreate a Spotify playlist
 
 def tracks_to_playlist(spot,user_id,playlist_id,track_ids: list) -> None:
@@ -47,11 +49,15 @@ def get_track_ids(spot: spotipy.Spotify, track_names: list) -> list:
     id_list = []
     for track in track_names:
         track_data = spot.search(q=track,limit=1,offset=0,type="track")
-        track_id = track_data['tracks']['items'][0]['id']
-        track_artist = track_data['tracks']['items'][0]['artists'][0]['name']
-        track_name = track_data['tracks']['items'][0]['name']
-        print(track_name,track_artist, track_id)
-        id_list.append(track_id)
+        number_returned = track_data['tracks']['total']
+        if number_returned == int(0):
+            print(f"{track}Not available")
+        else:
+            track_id = track_data['tracks']['items'][0]['id']
+            track_artist = track_data['tracks']['items'][0]['artists'][0]['name']
+            track_name = track_data['tracks']['items'][0]['name']
+            print(track_name,track_artist, track_id)
+            id_list.append(track_id)
 
     return(id_list)
     
