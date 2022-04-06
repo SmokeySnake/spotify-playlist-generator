@@ -22,11 +22,11 @@ def main() -> None:
 
     user_id: str = get_user_id(spot)
 
-    playlist_id = create_playlist(spot, playlist_name,user_id,public_private_tag)
+    playlist_id, playlist = create_playlist(spot, playlist_name,user_id,public_private_tag)
 
     tracks_to_playlist(spot,user_id,playlist_id,track_ids)
 
-    public_private_check(spot,user_id,playlist_id,public_private_tag)
+    public_private_check(playlist,spot,user_id,playlist_id,public_private_tag)
 
     print("\nCongratulations! \n\nYour playlist has been created!")
 

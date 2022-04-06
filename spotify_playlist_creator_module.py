@@ -6,20 +6,34 @@ from spotipy.oauth2 import SpotifyOAuth
 from json import load as jload
 import discogs_client
 
-def public_private_check(spot,user_id,playlist_id,public_private_tag) -> None:
+def public_private_check(playlist,spot,user_id,playlist_id,public_private_tag) -> None:
     """
-    Changes playlist status 
+    Checks that playlist is correct
+    Changes playlist status if not correct
     """
-    print()
-    spot.user_playlist_change_details(user_id,playlist_id,name=None,public=public_private_tag,collaborative=None,description=None)
-    print()
+    status = playlist['public']
+
+    if status == public_private_tag:
+        return
+    else:
+        spot.user_playlist_change_details(
+            user_id,
+            playlist_id,
+            name=None,
+            public=public_private_tag,
+            collaborative=None,
+            description=None)
 
 
 def tracks_to_playlist(spot,user_id,playlist_id,track_ids: list) -> None:
     """
     add tracks to the new playlist
     """
-    spot.user_playlist_add_tracks(user_id, playlist_id, track_ids, position=None)
+    spot.user_playlist_add_tracks(
+        user_id, 
+        playlist_id, 
+        track_ids, 
+        position=None)
 
 
 def create_playlist(spot,playlist_name: str,user_id,public_private_tag: str) -> str:
@@ -28,7 +42,8 @@ def create_playlist(spot,playlist_name: str,user_id,public_private_tag: str) -> 
     """
     
     name = playlist_name
-    description = input("Please enter a discription of your new playlist or just press enter")
+    description = input(
+        "Please enter a discription of your new playlist and/or press enter")
 
     playlist = spot.user_playlist_create(
         user_id, 
@@ -38,7 +53,7 @@ def create_playlist(spot,playlist_name: str,user_id,public_private_tag: str) -> 
         description=description)
     
     playlist_id = playlist["id"]
-    return(playlist_id)
+    return(playlist_id,playlist)
 
 
 def get_user_id(spot) -> str:
@@ -59,8 +74,10 @@ def get_track_ids(spot: spotipy.Spotify, track_names: list) -> list:
     """
     id_list = []
     for track in track_names:
+
         track_data = spot.search(q=track,limit=1,offset=0,type="track")
         number_returned = track_data['tracks']['total']
+
         if number_returned == int(0):
             print(f"{track}Not available")
         else:
@@ -89,7 +106,10 @@ def discog_search(disc: discogs_client.Client) -> list:
             case "1":
                 artist = input("Please enter artist name: ")
                 album = input("Pleaase enter album name: ")
-                track_data = disc.search(type="master",query=album,artist=artist)
+                track_data = disc.search(
+                    type="master",
+                    query=album,
+                    artist=artist)
 
                 track_list = []
 
@@ -167,7 +187,8 @@ def get_track_names(disc) -> list:
     while not success:
         success = True
 
-        method = input("\n \n Please select an input method: \n1. File \n2. Search\n \n")
+        method = input(
+            "\n Please select an input method: \n1. File \n2. Search\n \n")
 
         match method:
             case "1":
@@ -203,8 +224,12 @@ def spotify_auth(scope: str) -> spotipy.Spotify:
     client_secret: str = user_cred["SPOTIPY_CLIENT_SECRET"]
     redirect_uri: str = user_cred["SPOTIPY_REDIRECT_URI"]
 
-    spot_oa = SpotifyOAuth(scope=scope, client_id=client_id,
-                           client_secret=client_secret, redirect_uri=redirect_uri)
+    spot_oa = SpotifyOAuth(
+        scope=scope, 
+        client_id=client_id,
+        client_secret=client_secret, 
+        redirect_uri=redirect_uri)
+
     sp = spotipy.Spotify(auth_manager=spot_oa)
 
     return sp
@@ -219,7 +244,9 @@ def discog_auth() -> discogs_client.Client:
 
     user_token: str = user_cred["DISCOG_USER_TOKEN"] 
 
-    dc = discogs_client.Client("SpotifyPlaylistGenerator/0.1", user_token=user_token)
+    dc = discogs_client.Client(
+        "SpotifyPlaylistGenerator/0.1", 
+        user_token=user_token)
 
     return dc
 
